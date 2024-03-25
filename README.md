@@ -15,9 +15,9 @@ yarn install
 
 ## Setup
 
-Create a `.env.development` file and paste the contents below and replace actual values
+Create a `.env.production` file and paste the contents below and replace actual values
 
-```js
+```
 PORT=5000
 MONGO_URI=<mongo_uri>
 BUCKET_NAME=<bucket_name>
