@@ -1,0 +1,19 @@
+services:
+  mongo:
+    image: mongo
+    container_name: mongo
+    volumes:
+      - data:/data/db
+
+  app:
+    image: kishanlalbj/image-gallery
+    container_name: password-manager
+    ports:
+      - 80:5000
+    env_file:
+      - ./.env.production
+    depends_on:
+      - mongo
+
+volumes:
+  data:
