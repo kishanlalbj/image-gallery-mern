@@ -1,0 +1,11 @@
+services:
+  web:
+    build:
+      context: .
+      no_cache: false
+    command: "yarn dev --host"
+    ports:
+      - 5000:5173
+    volumes:
+      - ./:/app
+      - /app/node_modules

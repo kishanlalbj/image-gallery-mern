@@ -1,109 +1,86 @@
-import { useState } from "react";
-import { AiOutlineArrowLeft } from "react-icons/ai";
-import { AiOutlineArrowRight } from "react-icons/ai";
+import { useEffect, useState } from "react";
+import GalleryCard from "./GalleryCard";
+import Image from "./Image";
 
-const Gallery = ({ images, loading }) => {
-  const [isFullView, setFullView] = useState(false);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
+const Gallery = ({ images }) => {
+  const [currentIndex, setCurrentIndex] = useState(null);
+  const [showFull, setShowFull] = useState(false);
 
-  const handleImageClick = (index) => {
-    setFullView(true);
-
-    setSelectedImageIndex(index);
+  const handleOpenImage = (idx) => {
+    setCurrentIndex(idx);
+    setShowFull(true);
   };
 
-  const handleToggleFullView = () => {
-    setFullView((prev) => !prev);
-  };
-
-  const handlePrevious = (e) => {
+  const handleCloseFull = (e) => {
     e.stopPropagation();
-    if (selectedImageIndex === 0) return;
-
-    if (selectedImageIndex > 0) {
-      setSelectedImageIndex((prev) => prev - 1);
-    }
+    setShowFull(false);
+    setCurrentIndex(null);
   };
 
-  const handleNext = (e) => {
+  const handleImageClick = (e) => {
     e.stopPropagation();
-    if (selectedImageIndex === images.length - 1) return;
-
-    if (selectedImageIndex < images.length - 1) {
-      setSelectedImageIndex((prev) => prev + 1);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.which === 37) handlePrevious();
-    else if (e.which === 39) handleNext();
   };
 
   const renderImages = () => {
     if (images?.length === 0) return <p>No Images</p>;
 
-    return images.map((img, index) => (
-      <div
-        className="gallery-img"
-        key={img._id}
-        onClick={() => handleImageClick(index)}
-      >
-        <img
-          // src={"https://picsum.photos/800/600?grayscale"}
-          src={img.imageUrl}
-          alt={img.name}
-          width={"100%"}
-        ></img>
-
-        <div className="img-overlay"></div>
-      </div>
-    ));
+    return images.map((img, index) => {
+      return (
+        <GalleryCard
+          image={img.url}
+          key={img.id}
+          onClick={() => handleOpenImage(index)}
+        ></GalleryCard>
+      );
+    });
   };
 
-  const renderSkeletons = () => {
-    return [1, 2, 3, 4, 5, 6].map((item, index) => (
-      <div key={item + index} className="loading-skeleton"></div>
-    ));
-  };
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setShowFull(false);
+      }
+
+      if (e.key === "ArrowLeft") {
+        if (currentIndex !== 0) {
+          setCurrentIndex((prev) => prev - 1);
+        }
+      } else if (e.key === "ArrowRight") {
+        if (currentIndex + 1 !== images.length) {
+          setCurrentIndex((prev) => prev + 1);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [currentIndex, images.length]);
 
   return (
     <>
-      <section className="gallery-section">
-        <div className="gallery-container">
-          {!loading ? renderImages() : renderSkeletons()}
-        </div>
+      <section>
+        <div className="gallery">{renderImages()}</div>
 
-        {isFullView && (
-          <div className="full-view-container" onClick={handleToggleFullView}>
-            <div className="full-view-img">
-              <AiOutlineArrowLeft
-                style={{
-                  cursor: "pointer",
-                  visibility: selectedImageIndex !== 0 ? "visible" : "hidden"
-                }}
-                size={"48px"}
-                onKeyDown={handleKeyDown}
-                onClick={handlePrevious}
-              />
+        {showFull && (
+          <div
+            className="fixed top-0 left-0 bg-[rgba(0,0,0,1)] w-full h-full overflow-y-scroll z-10"
+            onClick={handleCloseFull}
+          >
+            <div className="w-full absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2">
+              <div className="flex flex-col items-center justify-center gap-12">
+                <Image
+                  src={images[currentIndex].url}
+                  className="w-2/5 shadow-md border-2 border-transparent rounded-md"
+                  onClick={handleImageClick}
+                ></Image>
 
-              <img
-                src={images[selectedImageIndex]?.imageUrl}
-                alt={images[selectedImageIndex]?.name}
-                width={"50%"}
-              ></img>
-
-              <AiOutlineArrowRight
-                style={{
-                  cursor: "pointer",
-                  visibility:
-                    selectedImageIndex !== images.length - 1
-                      ? "visible"
-                      : "hidden"
-                }}
-                size={"48px"}
-                onKeyDown={handleKeyDown}
-                onClick={handleNext}
-              />
+                <p className="text-white">
+                  {currentIndex + 1} / {images.length}
+                </p>
+              </div>
             </div>
           </div>
         )}

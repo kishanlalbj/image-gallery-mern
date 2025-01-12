@@ -1,49 +1,70 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import Gallery from "./components/Gallery";
 import Header from "./components/Header";
-import UploadButton from "./components/UploadButton";
-import { useEffect } from "react";
 import { API_URL } from "./utils/config";
+import Upload from "./components/Upload";
+
+// const IMAGES = [
+//   {
+//     id: 1,
+//     url: "https://picsum.photos/200/200"
+//   },
+//   {
+//     id: 2,
+//     url: "https://picsum.photos/200/201"
+//   },
+//   {
+//     id: 3,
+//     url: "https://picsum.photos/200/202"
+//   },
+//   {
+//     id: 4,
+//     url: "https://picsum.photos/200/203"
+//   },
+//   {
+//     id: 5,
+//     url: "https://picsum.photos/200/204"
+//   }
+// ];
 
 function App() {
   const [images, setImages] = useState([]);
-  const [file, setFile] = useState(null);
-  const [error, setError] = useState(null);
+
   const [loading, setLoading] = useState(false);
-
-  const [uploadLoading, setUploadLoading] = useState(false);
-
-  const fetchImages = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`${API_URL}/images`);
-      const data = await res.json();
-
-      if (res.status === 200) {
-        setImages(data);
-      } else {
-        setError("Something went wrong");
-      }
-    } catch (error) {
-      setError("Something went wrong");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const [file, setFile] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`${API_URL}/images`);
+        const data = await res.json();
+
+        if (res.status === 200) {
+          setImages(data);
+        } else {
+          setError("Something went wrong");
+        }
+      } catch (error) {
+        setError("Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchImages();
   }, []);
 
-  const handleFileChange = (e) => {
-    e.preventDefault();
-    setFile(e.target.files[0]);
-  };
+  // const handleFileChange = (e) => {
+  //   e.preventDefault();
+  //   setFile(e.target.files[0]);
+  // };
 
-  const handleUpload = async () => {
+  const handleUpload = async (file) => {
     try {
-      setUploadLoading(true);
+      setLoading(true);
       const formData = new FormData();
 
       formData.append("file", file, file.name);
@@ -53,33 +74,36 @@ function App() {
         body: formData
       });
 
-      if (resp.status === 201) {
-        setUploadLoading(false);
+      const data = await resp.json();
 
-        fetchImages();
+      if (resp.status === 201) {
+        setImages((prev) => [data.result, ...prev]);
       }
     } catch (error) {
-      setUploadLoading(false);
+      setError("Somthing went wrong..");
+    } finally {
+      setLoading(null);
     }
   };
 
+  useEffect(() => {
+    if (error) {
+      setTimeout(() => {
+        setError("");
+      }, 2000);
+    }
+  }, [error]);
+
   return (
     <>
-      <Header />
-      <div className="app">
-        <div className="container">
-          <UploadButton
-            loading={uploadLoading}
-            file={file}
-            onChange={handleFileChange}
-            onUpload={handleUpload}
-          />
+      <Header loading={loading} />
 
-          <Gallery loading={loading} images={images} />
-
-          {error && <p>{error}</p>}
-        </div>
+      <div className="container mt-10">
+        <Upload onUpload={handleUpload} />
+        <Gallery images={images} />
       </div>
+
+      {error && <p>{error}</p>}
     </>
   );
 }

@@ -1,12 +1,10 @@
 const Header = () => {
   return (
-    <div className="header">
-      <div className="container">
-        <div className="header-container">
-          <a href="/" className="brand">
-            Image Gallery
-          </a>
-        </div>
+    <div className="bg-primary h-14 text-white">
+      <div className="container flex items-center justify-between h-full">
+        <p>Image Gallery</p>
+
+        <div className="flex items-center gap-4">{/* <Upload /> */}</div>
       </div>
     </div>
   );
