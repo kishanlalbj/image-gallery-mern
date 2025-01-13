@@ -1,6 +1,7 @@
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 require("dotenv").config({ path: `./.env.${process.env.NODE_ENV}` });
 const imageRouter = require("./router/image");
 const authRouter = require("./auth");
@@ -8,6 +9,8 @@ const app = express();
 
 const mongoose = require("mongoose");
 const path = require("path");
+const notFound = require("./middlewares/notFound");
+const errorHandler = require("./middlewares/errorHandler");
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -18,11 +21,7 @@ mongoose
     console.log(err);
   });
 
-app.use(
-  cors({
-    origin: "http://172.30.240.1:5173"
-  })
-);
+app.use(cors());
 app.use(morgan("dev"));
 
 app.use(express.static(path.join(__dirname, "client", "dist")));
@@ -34,9 +33,13 @@ app.use("/images", express.static(path.join(__dirname, "uploads")));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
-app.use("/api", imageRouter);
-app.use("/api/auth", authRouter);
+app.use("/api/v1", imageRouter);
+app.use("/api/v1/auth", authRouter);
+
+app.use(errorHandler);
+app.use(notFound);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server running on ${process.env.PORT}  🚀`);

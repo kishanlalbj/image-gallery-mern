@@ -3,6 +3,10 @@ const Schema = mongoose.Schema;
 
 const ImageSchema = new Schema(
   {
+    postedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true
+    },
     name: {
       type: String,
       required: true

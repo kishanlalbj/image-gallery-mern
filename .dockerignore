@@ -1,2 +1,6 @@
 uploads
 node_modules
+*.md
+Screenshot.png
+.env
+.env.*

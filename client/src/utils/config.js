@@ -1,1 +1,6 @@
-export const API_URL = "http://172.30.240.1:5000/api";
+import axios from "axios";
+
+export const API = axios.create({
+  baseURL: "/api/v1",
+  withCredentials: true
+});

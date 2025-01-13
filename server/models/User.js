@@ -3,18 +3,29 @@ const bcrypt = require("bcryptjs");
 
 const Schema = mongoose.Schema;
 
-const UserSchema = new Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    match: [/^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/g, "Not a valid email"]
+const UserSchema = new Schema(
+  {
+    firstName: {
+      type: String,
+      required: true
+    },
+    lastName: {
+      type: String,
+      required: true
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      match: [/^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/g, "Not a valid email"]
+    },
+    password: {
+      type: String,
+      required: true
+    }
   },
-  password: {
-    type: String,
-    required: true
-  }
-});
+  { timestamps: true }
+);
 
 UserSchema.pre("save", function (next) {
   const salt = bcrypt.genSaltSync(10);

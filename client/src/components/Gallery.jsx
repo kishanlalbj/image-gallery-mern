@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import GalleryCard from "./GalleryCard";
 import Image from "./Image";
 
-const Gallery = ({ images }) => {
+const Gallery = ({ images, loading }) => {
   const [currentIndex, setCurrentIndex] = useState(null);
   const [showFull, setShowFull] = useState(false);
 
@@ -21,14 +21,25 @@ const Gallery = ({ images }) => {
     e.stopPropagation();
   };
 
+  const renderSkeletons = () => {
+    return [1, 2, 3, 4, 5, 6, 7, 8].map((e) => (
+      <div
+        key={e}
+        className="bg-zinc-400 animate-pulse min-w-full h-[100px]"
+      ></div>
+    ));
+  };
+
   const renderImages = () => {
+    if (loading) return renderSkeletons();
+
     if (images?.length === 0) return <p>No Images</p>;
 
     return images.map((img, index) => {
       return (
         <GalleryCard
           image={img.url}
-          key={img.id}
+          key={img._id}
           onClick={() => handleOpenImage(index)}
         ></GalleryCard>
       );
